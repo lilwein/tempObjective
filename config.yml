@@ -1,0 +1,17 @@
+log:
+  level: -1
+  enablejson: false
+config:
+
+  services:
+    api:
+      host: "localhost"
+      port: 3334
+      api-name: "Objective Service"
+      api-version: "0.1" # versione dell'openapi
+    postgres:
+      host: "localhost"
+      port: 5432
+      user: "postgres"
+      password: "p4ss.W0rd"
+      dbname: "TargetService"
