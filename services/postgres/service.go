@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"fmt"
-
 	"github.com/rs/zerolog/log"
 	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
@@ -23,7 +22,7 @@ func NewService(config *Config, lc fx.Lifecycle) *Service {
 		OnStart: func(ctx context.Context) error {
 			var err error
 
-			service.DB, err = gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
+			service.DB, err = gorm.Open(postgres.Open(psqlInfo), &gorm.Config{Logger: &ZerologLogger{logger: log.Logger}})
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to connect to Postgres")
 				return err

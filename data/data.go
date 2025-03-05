@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	apimodels "objective-service/api/routes/models"
 	datamodels "objective-service/data/models"
 	"objective-service/services/postgres"
 
@@ -15,8 +14,8 @@ func init() {
 }
 
 type IData interface {
-	GetPagedObjectives(ctx context.Context, filters *apimodels.GetAllObjectivesRequest) ([]*datamodels.Objective, *core.ApplicationError)
-	CountObjectives(ctx context.Context, filters *apimodels.GetAllObjectivesRequest) (int64, *core.ApplicationError)
+	GetPagedObjectives(ctx context.Context, filters *datamodels.GetAllObjectivesFilter, offset, limit int) ([]*datamodels.Objective, *core.ApplicationError)
+	CountObjectives(ctx context.Context, filters *datamodels.GetAllObjectivesFilter) (int64, *core.ApplicationError)
 }
 
 type Data struct {

@@ -34,7 +34,7 @@ func (Objective) TableName() string {
 }
 
 // Request
-type GetAllObjectivesRequest struct {
+type GetAllObjectivesFilter struct {
 	ObjectiveID   string `filter:"objectiveid_eq"`
 	CommitmentID  string `filter:"commitmentid_eq"`
 	OwnerID       string `filter:"ownerid_eq"`

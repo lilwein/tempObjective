@@ -3,6 +3,7 @@ package business
 import (
 	"context"
 	apimodels "objective-service/api/routes/models"
+	datamodels "objective-service/data/models"
 
 	"github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app"
 )
@@ -10,15 +11,16 @@ import (
 func (l Logic) GetAllObjectives(ctx context.Context, input *apimodels.GetAllObjectivesRequest) (*apimodels.GetAllObjectivesResponseBody, *core.ApplicationError) {
 
 	var response = &apimodels.GetAllObjectivesResponseBody{}
-
-	count, errCount := l.Data.CountObjectives(ctx, input)
+	filter := &datamodels.GetAllObjectivesFilter{}
+	//TODO generazione filtro a partire dall'input
+	count, errCount := l.Data.CountObjectives(ctx, filter)
 	if errCount != nil {
 		return nil, errCount
 	}
 
 	response.Found = count
 
-	items, errItems := l.Data.GetPagedObjectives(ctx, input)
+	items, errItems := l.Data.GetPagedObjectives(ctx, filter, input.PageNumber*input.PageSize, input.PageSize)
 	if errItems != nil {
 		return nil, errItems
 	}

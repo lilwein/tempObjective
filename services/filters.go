@@ -41,7 +41,7 @@ var operators = map[string]string{
 // Builds the Where query applying the filters, runs it with GORM and returns the result as *gorm.DB and nil.
 // If whereMap contains an invalid operator as key, returns error.
 // Operators: =, >, <, >=, <=, in, ilike, like
-func WhereResult(s any, db *gorm.DB) *core.ApplicationError {
+func WhereResult(db *gorm.DB, s any) *core.ApplicationError {
 
 	// Using reflect to work on struct s
 	v := reflect.ValueOf(s)
