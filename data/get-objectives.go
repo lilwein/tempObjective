@@ -24,22 +24,28 @@ func (d Data) GetPagedObjectives(ctx context.Context, filters *datamodels.GetAll
 	var query *gorm.DB = db
 
 	// Preload
-	query = query.Preload("ObjectiveType")
+	//query = query.Preload("ObjectiveType")
 
 	// JOIN
 	param := filters.ObjectiveTypeID
 	param = strings.ToLower(param)
+	query = query.Joins("ObjectiveType")
 	if param != "" {
-		//query = query.Joins("JOIN objectivetype ON objective.objectivetypeid = objectivetype.objectivetypeid")
+
 		query = query.Where("objectivetype.description = ?", param)
 	}
 
 	// WHERE: run query
-	if err := services.WhereResult(query, filters); err != nil {
+	query, errW := services.WhereResult(query, filters)
+	if errW != nil {
 		// return response, myerr.NewHttpErr("Error on WhereResult(): ", err, http.StatusBadRequest)
-		return nil, err
+		return nil, errW
 	}
-	result := query.Limit(limit).Offset(offset).Find(&responseDB)
+
+	if limit != 0 {
+		query = query.Limit(limit).Offset(offset)
+	}
+	result := query.Find(&responseDB)
 
 	err := result.Error
 	if err != nil {
@@ -57,25 +63,26 @@ func (d Data) GetPagedObjectives(ctx context.Context, filters *datamodels.GetAll
 func (d Data) CountObjectives(ctx context.Context, filters *datamodels.GetAllObjectivesFilter) (int64, *core.ApplicationError) {
 
 	// Preload
-	result := d.PgService.DB.Model(&datamodels.Objective{})
+	query := d.PgService.DB.Model(&datamodels.Objective{})
 
 	// JOIN
 	param := filters.ObjectiveTypeID
 	param = strings.ToLower(param)
 	if param != "" {
-		result = result.Joins("JOIN objectivetype ON objective.objectivetypeid = objectivetype.objectivetypeid")
-		result = result.Where("objectivetype.description = ?", param)
+		query = query.Joins("JOIN objectivetype ON objective.objectivetypeid = objectivetype.objectivetypeid")
+		query = query.Where("objectivetype.description = ?", param)
 	}
 
 	// WHERE: run query
-	if err := services.WhereResult(result, filters); err != nil {
+	query, err := services.WhereResult(query, filters)
+	if err != nil {
 		// return response, myerr.NewHttpErr("Error on WhereResult(): ", err, http.StatusBadRequest)
 		return 0, err
 	}
 	var count int64
-	result = result.Count(&count)
+	result := query.Count(&count)
 
-	if result.Error != nil {
+	if query.Error != nil {
 		return 0, core.TechnicalErrorWithCodeAndMessage("QUERY-FAILED", "Error on running query: "+result.Error.Error())
 	}
 

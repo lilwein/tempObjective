@@ -1,24 +1,18 @@
 package business
 
-import (
-	"time"
+// // Struct for one Objective response to the ListAll request
+// type Objective struct {
+// 	ObjectiveID  uuid.UUID
+// 	CommitmentID string
+// 	OwnerID      string
 
-	"github.com/google/uuid"
-)
+// 	Description   string
+// 	Status        string
+// 	Prioritylevel string
 
-// Struct for one Objective response to the ListAll request
-type Objective struct {
-	ObjectiveID  uuid.UUID
-	CommitmentID string
-	OwnerID      string
+// 	Progress      float32
+// 	Deadline_date time.Time
 
-	Description   string
-	Status        string
-	Prioritylevel string
-
-	Progress      float32
-	Deadline_date time.Time
-
-	ObjectiveType string
-	NKeyResults   int64
-}
+// 	ObjectiveType string
+// 	NKeyResults   int64
+// }

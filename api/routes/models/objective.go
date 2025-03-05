@@ -16,9 +16,9 @@ type GetAllObjectivesResponseBody struct {
 
 // Struct for one Objective response to the ListAll request
 type ObjectiveResponse struct {
-	ObjectiveID  uuid.UUID `json:"objectiveid" gorm:"column:objectiveid;primaryKey"`
-	CommitmentID string    `json:"commitmentid" gorm:"column:commitmentid"`
-	OwnerID      string    `json:"ownerid" gorm:"column:ownerid"`
+	ObjectiveID  uuid.UUID `json:"objectiveid`
+	CommitmentID string    `json:"commitmentid"`
+	OwnerID      string    `json:"ownerid"`
 
 	Description   string `json:"description"`
 	Status        string `json:"status"`
@@ -27,13 +27,8 @@ type ObjectiveResponse struct {
 	Progress      float32   `json:"progress"`
 	Deadline_date time.Time `json:"deadline_date"`
 
-	ObjectiveType string `json:"_objectivetype" gorm:"-"`
-	NKeyResults   int64  `json:"_nkeyresults" gorm:"-"`
-}
-
-// TableName overrides the default table name
-func (ObjectiveResponse) TableName() string {
-	return "objective"
+	ObjectiveType string `json:"_objectivetype"`
+	NKeyResults   int64  `json:"_nkeyresults"`
 }
 
 // Request
@@ -61,6 +56,6 @@ type GetAllObjectivesRequest struct {
 	Deadline_date_LTE   string `query:"deadline_date_lte"`
 	Completion_date_LTE string `query:"completion_date_lte"`
 
-	PageNumber int `query:"pagenumber"`
-	PageSize   int `query:"pagesize"`
+	PageNumber string `query:"pagenumber"`
+	PageSize   string `query:"pagesize"`
 }

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"math"
 	"strconv"
+
+	"github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app"
 )
 
 const (
@@ -130,12 +132,12 @@ func (p *Paging) setHasPrev(hasPrev bool) {
 // Get page size from query param.
 // If errors or size < 0, return error.
 // If empty, return default value.
-func GetPageSize(param string) (int, error) {
+func GetPageSize(param string) (int, *core.ApplicationError) {
 
 	if param != "" {
 		pageSize, err := strconv.Atoi(param)
 		if err != nil || pageSize < 0 {
-			return 0, errors.New("invalid page size")
+			return 0, core.BusinessErrorWithCodeAndMessage("ERR-PAGESIZE", "invalid page size")
 		}
 		return pageSize, nil
 	}
@@ -150,7 +152,7 @@ func GetPageNumber(param string) (int, error) {
 	if param != "" {
 		pageNumber, err := strconv.Atoi(param)
 		if err != nil || pageNumber < 1 {
-			return 0, errors.New("invalid page number")
+			return 0, core.BusinessErrorWithCodeAndMessage("ERR-PAGENUMBER", "invalid page number")
 		}
 
 		return pageNumber, nil

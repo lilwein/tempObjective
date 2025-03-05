@@ -38,7 +38,7 @@ func (z *ZerologLogger) Trace(ctx context.Context, begin time.Time, fc func() (s
 	sql, rows := fc()
 	duration := time.Since(begin)
 
-	event := z.logger.Debug()
+	event := z.logger.Trace()
 	if err != nil {
 		event = z.logger.Error().Err(err)
 	}

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -35,13 +36,22 @@ const (
 // }
 
 var operators = map[string]string{
-	"eq": equal,
+	"eq":    equal,
+	"lt":    less,
+	"lte":   less_e,
+	"gt":    greater,
+	"gte":   greater_e,
+	"in":    in,
+	"like":  like,
+	"ilike": ilike,
+	"LIKE":  like_,
+	"ILIKE": ilike_,
 }
 
 // Builds the Where query applying the filters, runs it with GORM and returns the result as *gorm.DB and nil.
 // If whereMap contains an invalid operator as key, returns error.
 // Operators: =, >, <, >=, <=, in, ilike, like
-func WhereResult(db *gorm.DB, s any) *core.ApplicationError {
+func WhereResult(db *gorm.DB, s any) (*gorm.DB, *core.ApplicationError) {
 
 	// Using reflect to work on struct s
 	v := reflect.ValueOf(s)
@@ -49,10 +59,10 @@ func WhereResult(db *gorm.DB, s any) *core.ApplicationError {
 		v = v.Elem()
 	}
 	if v.Kind() != reflect.Struct {
-		return core.TechnicalErrorWithCodeAndMessage("NOT-STRUCT", "input is not a struct")
+		return nil, core.TechnicalErrorWithCodeAndMessage("NOT-STRUCT", "input is not a struct")
 	}
 	t := v.Type()
-
+	query := db
 	// For each field of struct s
 	for i := range v.NumField() {
 
@@ -61,6 +71,7 @@ func WhereResult(db *gorm.DB, s any) *core.ApplicationError {
 
 		// If tag == "" then do nothing
 		if tag != "" {
+			log.Trace().Msgf("tag: %s", tag)
 
 			// Get value of field
 			var value string
@@ -71,17 +82,21 @@ func WhereResult(db *gorm.DB, s any) *core.ApplicationError {
 			}
 
 			// If value == "" then do nothing
-			if err := whereResult(db, tag, value); err != nil {
-				return err
+			if value != "" {
+				var errW *core.ApplicationError
+				query, errW = whereResult(query, tag, value)
+				if errW != nil {
+					return nil, errW
+				}
 			}
 
 		}
 	}
 
-	return nil
+	return query, nil
 }
 
-func whereResult(db *gorm.DB, qp, value string) *core.ApplicationError {
+func whereResult(db *gorm.DB, qp, value string) (*gorm.DB, *core.ApplicationError) {
 
 	// Correct Query Parameter Key
 	key, op := ExcludeLastUnderscore(qp)
@@ -89,7 +104,7 @@ func whereResult(db *gorm.DB, qp, value string) *core.ApplicationError {
 	// Check if the operator is correct
 	operator, ok := operators[op]
 	if !ok {
-		return core.TechnicalErrorWithCodeAndMessage("INVALID-OPERATOR", "invalid operator")
+		return nil, core.TechnicalErrorWithCodeAndMessage("INVALID-OPERATOR", "invalid operator")
 	}
 
 	// Parameter
@@ -105,9 +120,8 @@ func whereResult(db *gorm.DB, qp, value string) *core.ApplicationError {
 	}
 
 	// Build query with gorm
-	db = db.Where(statement, param)
+	return db.Where(statement, param), nil
 
-	return nil
 }
 
 // Returns the s string without the last token after the last underscore, if this exists

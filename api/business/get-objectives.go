@@ -4,6 +4,7 @@ import (
 	"context"
 	apimodels "objective-service/api/routes/models"
 	datamodels "objective-service/data/models"
+	"objective-service/entities/page"
 
 	"github.com/GPA-Gruppo-Progetti-Avanzati-SRL/go-core-app"
 )
@@ -11,7 +12,7 @@ import (
 func (l Logic) GetAllObjectives(ctx context.Context, input *apimodels.GetAllObjectivesRequest) (*apimodels.GetAllObjectivesResponseBody, *core.ApplicationError) {
 
 	var response = &apimodels.GetAllObjectivesResponseBody{}
-	filter := &datamodels.GetAllObjectivesFilter{}
+	filter := &datamodels.GetAllObjectivesFilter{Prioritylevel: input.Prioritylevel}
 	//TODO generazione filtro a partire dall'input
 	count, errCount := l.Data.CountObjectives(ctx, filter)
 	if errCount != nil {
@@ -20,7 +21,41 @@ func (l Logic) GetAllObjectives(ctx context.Context, input *apimodels.GetAllObje
 
 	response.Found = count
 
-	items, errItems := l.Data.GetPagedObjectives(ctx, filter, input.PageNumber*input.PageSize, input.PageSize)
+	// PAGING
+	var offset, limit int
+	// Page Size from query param
+	// fmt.Println("############################### ", filters.PageSize)
+	pageSize, err := page.GetPageSize(input.PageSize)
+
+	// If Page Size is uncorrect, error
+	// If Page Size is not defined, return default number of items.
+	// If Page Size is 0, return all items.
+	// Otherwise, apply paging.
+	if err != nil {
+		return response, core.BusinessErrorWithError(err)
+
+	} else if pageSize == 0 {
+		limit = 0
+		offset = 0
+
+	} else {
+
+		// Initialize Paging Metadata
+		response.PagingMetaData = page.InitPaging(pageSize, int(response.Found))
+
+		// Selected Page Number from query param
+		selectedPage, err := page.GetPageNumber(input.PageNumber)
+		if err != nil {
+			return response, core.BusinessErrorWithError(err)
+		}
+		response.PagingMetaData.SetCurrentPage(selectedPage)
+
+		//
+		limit = pageSize
+		offset = (selectedPage - 1) * pageSize
+	}
+
+	items, errItems := l.Data.GetPagedObjectives(ctx, filter, offset, limit)
 	if errItems != nil {
 		return nil, errItems
 	}
